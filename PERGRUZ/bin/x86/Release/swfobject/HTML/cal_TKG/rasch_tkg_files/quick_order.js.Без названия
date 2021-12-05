@@ -1,0 +1,212 @@
+function calcForm(){
+  var err = 0;
+  var checkFields = ["cplace1", "cplace2", "cweight"];
+  for (var i in checkFields){
+    if (checkFields.hasOwnProperty(i)){
+      if (typeof($.orderForm.data[checkFields[i]]) == "undefined"){
+        $("#"+checkFields[i]).addClass('error');
+        err += 1;
+      } else {
+        $("#"+checkFields[i]).removeClass('error');
+      }
+    }
+  }
+  if (err > 0){
+    return false;
+  }
+ 
+  var formData = "";
+  for (var item in $.orderForm.data){
+    if ($.orderForm.data.hasOwnProperty(item)){
+      if (formData == ""){
+        formData = "orderData={";
+      } else {
+        formData = formData + ",";
+      }
+      formData = formData + '"' + item + '":"' + $.orderForm.data[item] + '"';
+    }
+  }
+  //mail = $("#formOrderForm1 input[name='inputMail']");
+  //phone = $("#formOrderForm1 input[name='inputPhone']");
+  if ($.orderForm.mail){
+    $.orderForm.mail.trigger("change.showError");
+  }
+  if ($.orderForm.phone){
+    $.orderForm.phone.trigger("change.showError");
+  }
+  formData = formData + "}";
+  //Sending event to google analytics
+  try {
+    trackingValue = $("#cplace1").val()+"; "+$("#cplace2").val()+"; "+$("#cweight").val().replace(" ","");
+    _gaq.push(['_trackEvent', 'calcForm', 'Calculate', trackingValue]);
+  } catch (e){};
+  $.ajax({
+    type: "POST",
+    url: "/lib/calc_order.php",
+    data: formData,
+    dataType: "json"
+  }).done(function(msg){
+    if (typeof(msg.error) != 'undefined'){
+      window.alert(msg.error);
+    }
+    if ((typeof(msg.targetWeight) != "undefined") && (msg.targetWeight > 0)){
+      $('#cost_euro').html(msg.price);
+      $('#cost_weight').html(msg.targetWeight);
+      $('#cost_palet').html(msg.pll);
+      $('#cost_amount').html(msg.cbm);
+      $('#cost_metr').html(msg.ldm);
+      $("#calculated").slideDown(500);
+    } else {
+      $("#calculated").slideUp(500);
+    }
+  });
+};
+
+function citySelect(id, title){
+  $.orderForm.menuTarget.val(title);
+  $.orderForm.data[$.orderForm.menuTarget.attr("id")] = id;
+  $.orderForm.menu.menu("destroy");
+  $.orderForm.menu.remove();
+  delete($.orderForm.menu);
+  delete($.orderForm.menuTarget);
+  
+}
+
+$().ready(function(){
+  $("#cplace1, #cplace2").each(function(evt){
+    var arrow = $('<img src="/images/drop_down_arrow.gif">');
+    arrow.css("position", "absolute")
+         .css("top", $(this).position().top+12+"px")
+         .css("left", $(this).position().left+$(this).width()+4+"px")
+         .css("cursor", "pointer");
+    arrow.click(function(){
+      if (typeof($.orderForm.menu) == "undefined"){
+        $.orderForm.menuTarget = $(this).prev();
+        var menuPos = $(this);
+        $.ajax({
+          url: "/lib/citymenu.php"
+        }).done(function(data){
+          $.orderForm.menu = $(data);
+          $.orderForm.menu.css("position", "absolute")
+                          .css("top", menuPos.position().top+"px")
+                          .css("left", menuPos.position().left+20+"px")
+                          .css("z-index", "10");
+          $.orderForm.menu.menu();
+          menuPos.after($.orderForm.menu);
+        });
+      }
+    });
+    $(this).after(arrow);
+  });
+  $("#cplace1, #cplace2").autocomplete({
+    source: function(request, response){
+      $.orderForm.data[this.element[0].id] = "";
+      $.ajax({
+        url: "/lib/citynames.php",
+        dataType: "json",
+        data: {
+          term: request.term,
+          state: $("state").val(),
+          maxRows: 15
+        }
+      }).done(function(data){
+        response($.map(data.cities, function(item){
+          return {
+            id: item.id,
+            value: item.value
+          }
+        }));
+      }).fail(function(jqXHR, textStatus){
+        window.alert('Ошибка: ' + textStatus);
+      });
+    }
+  }).bind("autocompleteselect", function(evt, ui){
+    $.orderForm.data[evt.target.id] = ui.item.id;
+  });
+  
+  $('#cweight').on("keyup blur click",function(evt){
+    var input = $(this).val();
+    var output = "";
+    var x = 1;
+    // don't restore position for this keys
+    var keymoves = [9,35,36,37,39];
+    var pos = $(this).caret();
+    for (var i=input.length-1;i>=0;i--){
+      if (input.substr(i, 1).match("[0-9]")){
+        output = input.substr(i,1)+output;
+        if ((x%3 === 0)&&(i > 0)){
+          output = " "+output;
+        }
+        x++;
+      }
+    }
+    if (((input.length-3) < output.length)&&(output.length > 3)){
+      pos++;
+    }
+    $.orderForm.data[evt.target.id] = output.replace(/\ /g, "");
+    if (pos > output.length){
+      pos = output.length;
+    }
+    if (output.length > 0){
+      output += " кг";
+    }
+    $(this).val(output);
+    if (evt.type != "blur"){
+      if (keymoves.indexOf(evt.which) == -1) {
+        $(this).caret(pos);
+      }
+    }
+    return true;
+  });
+  $("#step1").click(calcForm);
+  $('.calculated .calc_reset').click(function(event){
+    $(this).closest('form')[0].reset();
+    $("#calculated").slideUp(500);
+  });
+  $("#calc").ajaxForm({
+    beforeSubmit: function(arr, $form, options){
+      var formOk = false;
+      for (var i in arr){
+        if (arr.hasOwnProperty(i)){
+          if ((arr[i].name == "umail")&&(arr[i].value.length > 0)){
+            formOk = true;
+          } else if ((arr[i].name == "utel")&&(arr[i].value.length > 0)){
+            formOk = true;
+          }
+        }
+      }
+      if (!formOk){
+        $("input[name=umail], input[name=utel]").each(function(){
+          if (!$(this).hasClass("error")){
+            $(this).addClass("error");
+          }
+        });
+      } else {
+        $("input[name=umail], input[name=utel]").each(function(){
+          if ($(this).hasClass("error")){
+            $(this).removeClass("error");
+          }
+        });
+      }
+      return formOk;
+    },
+    success: function(responseText, statusText, xhr, form){
+      if (responseText == 'OK'){
+        $("#formMessage").dialog({
+          title: "",
+          width: "auto",
+          height: "auto"
+        });
+        form.resetForm();
+        $("#calculated").slideUp(500);
+      } else {
+        $("#formMessage").html(responseText);
+        $("#formMessage").dialog({
+          title: "Error"
+        });
+      }
+    }
+  });
+});
+$.orderForm = {};
+$.orderForm.data = [];

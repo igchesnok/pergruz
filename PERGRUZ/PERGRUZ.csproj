@@ -1,0 +1,193 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E2A8A366-30BB-4DEF-A3F3-75A153AAD096}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>PERGRUZ</RootNamespace>
+    <AssemblyName>PERGRUZ</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Awesomium.Core, Version=1.7.5.1, Culture=neutral, PublicKeyToken=e1a0d7c8071a5214" />
+    <Reference Include="Awesomium.Windows.Forms, Version=1.7.5.1, Culture=neutral, PublicKeyToken=9bd24830fbe304a0, processorArchitecture=x86" />
+    <Reference Include="DevComponents.DotNetBar2, Version=12.5.0.2, Culture=neutral, PublicKeyToken=c39c3242a43eee2b, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="unvell.ReoGrid, Version=2.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\unvell.ReoGrid.dll.2.2.0\lib\net20\unvell.ReoGrid.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="blank_raschet.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="blank_raschet.Designer.cs">
+      <DependentUpon>blank_raschet.cs</DependentUpon>
+    </Compile>
+    <Compile Include="blank_zaivl.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="blank_zaivl.Designer.cs">
+      <DependentUpon>blank_zaivl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="blankNew.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="blankNew.Designer.cs">
+      <DependentUpon>blankNew.cs</DependentUpon>
+    </Compile>
+    <Compile Include="blank_Rascheta_vreda.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="blank_Rascheta_vreda.Designer.cs">
+      <DependentUpon>blank_Rascheta_vreda.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form_Glavn.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form_Glavn.Designer.cs">
+      <DependentUpon>Form_Glavn.cs</DependentUpon>
+    </Compile>
+    <Compile Include="karta.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="karta.Designer.cs">
+      <DependentUpon>karta.cs</DependentUpon>
+    </Compile>
+    <Compile Include="obrachen.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="obrachen.Designer.cs">
+      <DependentUpon>obrachen.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="rasch_comp.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="rasch_comp.Designer.cs">
+      <DependentUpon>rasch_comp.cs</DependentUpon>
+    </Compile>
+    <Compile Include="toolTip_r.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="toolTip_r.Designer.cs">
+      <DependentUpon>toolTip_r.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="blank_raschet.resx">
+      <DependentUpon>blank_raschet.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="blank_zaivl.resx">
+      <DependentUpon>blank_zaivl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="blankNew.resx">
+      <DependentUpon>blankNew.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="blank_Rascheta_vreda.resx">
+      <DependentUpon>blank_Rascheta_vreda.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form_Glavn.resx">
+      <DependentUpon>Form_Glavn.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="karta.resx">
+      <DependentUpon>karta.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="obrachen.resx">
+      <DependentUpon>obrachen.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="rasch_comp.resx">
+      <DependentUpon>rasch_comp.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="toolTip_r.resx">
+      <DependentUpon>toolTip_r.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

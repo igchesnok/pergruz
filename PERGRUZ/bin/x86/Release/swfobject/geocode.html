@@ -1,0 +1,228 @@
+﻿  <title>Быстрый старт. Размещение интерактивной карты на странице</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=524cc648-171e-4c46-bf40-2da84f435ed2&lang=ru_RU" type="text/javascript"> </script>
+      <script src="https://yandex.st/jquery/2.2.3/jquery.min.js" type="text/javascript"></script>
+      <input type="text" id="suggest" />
+    <script type="text/javascript">
+        var myMap ;
+        var geo_Coord;
+        var geoObjects = [];
+        var geoObjects_str = [];
+        var geoObject_str = [];
+        var geoObjects_neam = [];
+        var ind;
+        var nems_len;
+        var searchControl;
+        nems = ['Тольятти Ворошилова 24', 'Тольятти Ворошилова 34', 'Тольятти, Свердлова, Степана Разина', 'Тольятти Свердлова Ворошилова', 'остановка Управление соцзащиты, Тольятти'];
+
+
+       ymaps.ready(init);//.then(function () { });
+//___________________________________________________________________________________________________________       
+        function init() {
+            ind = 0;
+            nems_len = nems.length;
+            myMap = new ymaps.Map('map', {
+                center: [53.508816, 49.4192076],//geoObjects[0].geometry.getCoordinates() ,
+                zoom: 9,
+                controls: [],
+                bounds: [[53.4280098, 48.9512575], [53.5980929, 49.7677559]]
+            });
+             searchControl = new ymaps.control.SearchControl({
+                options: {
+                    provider: 'yandex#search',
+                    resultsPerPage: 100,
+                    searchControlMaxWidth: [30, 720, 500],
+                    fitMaxWidth: true
+                  //  visible: false
+                }
+            });
+            myMap.controls.add(searchControl);
+            var suggestView = new ymaps.SuggestView('suggest', {
+                results: 10,
+                offset: [40, 300],
+                provider: 'yandex#search'
+            });
+            // Программно выполним поиск определённых кафе в текущей
+            // прямоугольной области карты.
+           
+            for (var i = 0, len = nems_len; i < len; i++) {//в цикле геокодируем масив названий nems
+                sre(nems[i], true);  // // Будет производиться поиск по топонимам и организациям.
+               // searchControlProvider: 'yandex#search'
+            }
+        }
+//___________________________________________________________________________________________________________       
+        document.addEventListener('geo_Coord', function (e) { // Слушаем событие
+            jso_geo_Coord.geo_Coord(e.detail);//вызываем метод myMethod из кода C#
+        }, false);
+//___________________________________________________________________________________________________________       
+        document.addEventListener('geo_Objects', function (e) { // Слушаем событие
+            jso_geo_Objects.geo_Objects(e.detail);//вызываем метод myMethod из кода C#
+        }, false);
+//___________________________________________________________________________________________________________       
+        function sre(str, add_map) {
+            var myGeocoder = ymaps.geocode(str, {
+              boundedBy: [[53.4280098, 48.9512575], [53.5980929, 49.7677559]],
+           //    results: 1, // Если нужен только один результат, экономим трафик пользователей.
+              strictBounds: true ,
+            //   provider: 'yandex#search'
+            });
+            
+            myGeocoder.then(function (res) {
+                console.log('myGeocoder: ', res); 
+               // alert("sre  =  " + ind + "  -     " + nems_len);
+                var obj = [];
+                // Выбираем первый результат геокодирования.
+                var kol = res.geoObjects.getLength();
+                if (kol!=0) {
+                    console.log('kol: ', kol);
+                    var geoObject = res.geoObjects.get(0);
+                    console.log('Все данные геообъекта: ', geoObject.properties.getAll());
+                    //если установлен add_map == true выводим обьект на карту
+                    obj[0] = geoObject.properties.get('name');//сохраняем наменовани обьекта в строковой масив;
+                    obj[1] = JSON.stringify(geoObject.geometry.getCoordinates());//передача кординат в виде строки "[55.753994, 37.622093]";
+                    geoObject_str[0] = obj
+                    if (add_map == true) {
+                        geoObjects[ind] = geoObject;
+                        callback(ind);
+                        ind = ind + 1;
+                    }
+                    // Создание события полечения геокординат обьекта
+                    var geo_Coord = new CustomEvent('geo_Coord', {
+                        bubbles: false,
+                        detail: geoObject_str
+                    });
+                    // вызываем событие
+                    document.dispatchEvent(geo_Coord);  
+                } else {
+                    nems_len--;
+                    searchControl.search(str);
+                    var results = searchControl.getResultsArray(),
+                        // Индекс выбранного объекта.
+                        selected = e.get('index'),
+                        // Получаем координаты выбранного объекта.
+                        point = results[selected].geometry.getCoordinates();
+                }
+            }, function (err) {
+                alert("Ничего не найдено");
+                searchControl.search(str);
+                ind = ind + 1; // отказ
+                
+                }, function (err) {
+                    alert("Ничего не найдено2");
+                    // Обработка ошибки.
+                }
+            );
+
+
+          
+
+
+        }
+//___________________________________________________________________________________________________________       
+        function callback(ind) {
+          //  alert("callback  =  " + ind + "  -     " + nems_len);nems_len
+            if (ind == nems_len-1) {
+                var obj_ = [];
+                for (var i = 0, len = nems_len; i < len; i++) {
+                    var obj = [];
+                    geoObjects[i].options.set('preset', 'islands#darkBlueDotIconWithCaption');
+                    geoObjects[i].properties.set('iconCaption', geoObjects[i].getAddressLine());
+                    // Добавляем первый найденный геообъект на карту.
+                    myMap.geoObjects.add(geoObjects[i]);
+                    obj[0] = geoObjects[i].properties.get('name');//сохраняем наменовани обьекта в строковой масив;
+                    obj[1] = JSON.stringify(geoObjects[i].geometry.getCoordinates());//передача кординат в виде строки "[55.753994, 37.622093]";
+                    obj_[i] = obj;
+                    geoObjects_str[i] = obj_[i] ;
+                }
+                // Создание события полечения геокординат обьекта
+                var geo_Objects = new CustomEvent('geo_Objects', {
+                    bubbles: true,
+                    detail: geoObjects_str
+                });
+                // вызываем событие
+                document.dispatchEvent(geo_Objects);  
+            }
+        }
+//___________________________________________________________________________________________________________       
+
+
+        //function showAddress(value) {
+        //    map.removeOverlay(geoResult);
+
+        //    var mysearchBounds = new YMaps.GeoBounds(new YMaps.GeoPoint(43.69101, 56.166626), new YMaps.GeoPoint(44.175786, 56.407228));
+        //    var geocoder = new YMaps.Geocoder(value, { boundedBy: mysearchBounds, strictBounds: true });
+
+
+        //    YMaps.Events.observe(geocoder, geocoder.Events.Load, function () {
+        //        if (this.length()) {
+        //            geoResult = this.get(0);
+        //            map.addOverlay(geoResult);
+        //            map.setBounds(geoResult.getBounds());
+        //            geoResult.openBalloon();
+        //        } else {
+        //            alert("Ничего не найдено")
+        //        }
+        //    });
+        //}
+
+
+
+
+
+
+
+
+
+
+
+     function sre_(str) { 
+         return( ymaps.geocode(str, {
+             results: 1 // Если нужен только один результат, экономим трафик пользователей.
+         }).then(function (res) {
+             // Выбираем первый результат геокодирования.
+             var firstGeoObject = res.geoObjects.get(0);
+             callback_(firstGeoObject);
+             return (firstGeoObject.geometry.getCoordinates());
+         }))
+        }
+
+        function callback_(geoObjects_) {
+            geoObjects_.options.set('preset', 'islands#darkBlueDotIconWithCaption');
+            geoObjects_.properties.set('iconCaption', geoObjects_.getAddressLine());
+            myMap.geoObjects.add(geoObjects_);
+        }
+
+    function geo_text(str) {
+        return (ymaps.geocode(str, {
+            results: 1 // Если нужен только один результат, экономим трафик пользователей.
+        }).then(function (res) {
+            return (res.geoObjects.get(0).geometry.getCoordinates());// Выбираем первый результат геокодирования.
+        }))
+    }
+
+
+    
+  //  console.log('Кординаты :', window["screen"]);
+        // ...запуск события на элементе!
+    //  let event = new Event("hello", { bubbles: true }); // (2)
+                //   console.log('Кординаты :', geo_text('Тольятти') ); 
+                            //   console.log('Кординаты :', geoObjects[i].geometry.getCoordinates());
+      //  alert("canceled  =  " + ind + "  -     " + nems_len);
+
+               // bounds = geoObjects[0].properties.get('boundedBy');
+               // myMap.setBounds(bounds, { checkZoomRange: true });
+                //  console.log('Кординаты :',sre_("Тольятти, 40 лет Победы, 64")); 
+
+  // обработчик на document сработает и выведет сообщение.
+            
+      //  ymaps.geocode('Тольятти Ворошилова 24', { results: 1 }).then(function (res) { return res.geoObjects.get(0).geometry.getCoordinates() }); console.log('Кординаты :', geo());
+        
+</script>
+</head>
+
+<body>
+    <div id="map" style="width:2000px; height:1200px"></div>
+</body>
+
+</html>
+

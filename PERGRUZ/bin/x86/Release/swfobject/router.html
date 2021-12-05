@@ -1,0 +1,364 @@
+<html>
+
+<head>
+    <title>Примеры. Построение маршрута</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    
+     <script var selfmap=0; src="https://api-maps.yandex.ru/2.0/?load=package.standard,package.route&amp;lang=ru-RU&amp;apikey=9faf8fb6-cb25-42e6-9c0f-07b065fe7875" type="text/javascript"></script>
+    <script src="https://yandex.st/jquery/1.6.4/jquery.min.js" type="text/javascript"></script>
+
+	<script  type="text/javascript">
+	ymaps.ready(init);
+var router1;
+var myMap ;
+var Strit_m=[];
+function init() {
+     myMap = new ymaps.Map('map', {
+            center: [ 53.5303 ,49.3461],
+            zoom: 13,
+            type: 'yandex#map',
+            behaviors: ['scrollZoom', 'drag'],
+			// и кнопка полноэкранного режима
+			
+			
+			controls: []
+	   });
+	   
+       myMap.controls
+        // В конструкторе элемента управления можно задавать расширенные
+        // параметры, например, тип карты в обзорной карте.
+        .add(new ymaps.control.MiniMap({  type: 'yandex#publicMap'},{ size: [290, 290] },{ zoomOffset:6}));
+ 
+ var searchStartPoint = new ymaps.control.SearchControl({
+            useMapBounds: true,
+            noPlacemark: true,
+            noPopup: true,
+            placeholderContent: 'Адрес'
+        });
+myMap.controls.add(searchStartPoint, { left: 5, top: 5 });
+
+	  calculator = new DeliveryCalculator(myMap);
+		// и кнопка полноэкранного режима
+}
+
+function DeliveryCalculator(map) {
+    this._map = map;
+    selfmap = map;
+    this._start = null;
+    this._route = null;
+
+    map.events.add('click', this._onClick, this);
+}
+
+var ptp = DeliveryCalculator.prototype;
+
+ptp._onClick= function (e) {
+    if (this._start) {
+        this.setFinishPoint(e.get('coordPosition'));
+    } else {
+        this.setStartPoint(e.get('coordPosition'));
+    }
+};
+ptp._onDragEnd = function (e) {
+    this.getDirection();
+}
+ptp.getDirection = function () {
+    if (this._route) {
+        this._map.geoObjects.remove(this._route);
+    }
+    if (this._start && this._finish) {
+	self = this,
+	 
+            start = this._start.geometry.getCoordinates(),
+            finish = this._finish.geometry.getCoordinates();
+			
+		ymaps.geocode(start, { results: 1 })
+            .then(function (geocode) {
+                var address = geocode.geoObjects.get(0) &&
+                    geocode.geoObjects.get(0).properties.get('balloonContentBody') || '';
+					ymaps.route([start, finish])
+                    .then(function (router) {
+					
+                        self._route = router.getPaths();
+                        self._route.options.set({ strokeWidth: 5, strokeColor: '0000ffff', opacity: 0.5 });
+                        self._map.geoObjects.add(router);
+						router.editor.start({ addWayPoints: true });//ЗАПУСКАЕМ РЕДАКТОР МАРШРУТА
+					//УДОЛЯЕМ МАРШРУТ
+						document.getElementById('buttons2').onclick = function () {
+							var moveList = ''
+							document.getElementById('list').value =moveList;// ОЧИЩАЕМ маршрутный лист.
+							
+							self._map.geoObjects.remove(router);
+							router=null;
+							Strit_m.length = 0;
+						};
+					//СТРОИМ СПИСОК МАРШРУТА	
+					
+						document.getElementById('buttons1').onclick = function () {
+					//	console.log('this._start: ',router.getPaths());
+							 var moveList = '',
+								way,
+								index_=-1,
+								street,
+								street1= '',
+								segments,
+								Lstreet_;
+								Strit_m.length = 0;
+							// Получаем массив путей.
+							for (var i = 0; i < router.getPaths().getLength(); i++) {
+								way = router.getPaths().get(i);
+								segments = way.getSegments();
+							//	 console.log('segments: ',i, segments)
+								for (var j = 0; j < segments.length; j++) { length
+									Lstreet_ = segments[j].getLength();
+									street = segments[j].getStreet();
+								//	console.log('Метаданные ответа геокодера: ', street, Lstreet_)
+									if (street.indexOf ("улица ")!=-1) street = street.replace("улица ", "ул. ");
+									else {
+										if (street.indexOf (" улица")!=-1) {
+											street = street.replace(" улица", "");
+											street="ул. "+ street;
+										}
+										else {	
+											if (street.indexOf ("шоссе ")!=-1) street = street.replace("шоссе ", "ш. ");
+											else {
+												if (street.indexOf (" шоссе")!=-1) {
+													street = street.replace(" шоссе", "");
+													street="ш. "+ street;
+												}
+												else {
+													if (street.indexOf ("бульвар ")!=-1) street = street.replace("бульвар ", "б-р ");
+													else {
+														if (street.indexOf (" бульвар")!=-1) {
+															street = street.replace(" бульвар", "");
+															street="б-р "+ street;
+														}
+														else {
+															if (street.indexOf ("проспект ")!=-1) street = street.replace("проспект ", "п-т ");
+															else {
+																if (street.indexOf (" проспект")!=-1) {
+																	street = street.replace(" проспект", "");
+																	street="п-т "+ street;
+																}
+																else {
+																	if (street.indexOf ("площадь ")!=-1) street = street.replace("площадь ", "пл. ");
+																	else {
+																		if (street.indexOf (" площадь")!=-1) {
+																			street = street.replace(" площадь", "");
+																			street="пл. "+ street;
+																		}
+																		else {
+																			if (street.indexOf ("переулок ")!=-1) street = street.replace("переулок ", "пер. ");
+																			else {
+																				if (street.indexOf (" переулок")!=-1) {
+																					street = street.replace(" переулок", "");
+																					street="пер. "+ street;
+																				}
+																				else {
+																					if (street.indexOf ("проезд ")!=-1) street = street.replace("проезд ", "пр. ");
+																					else {
+																						if (street.indexOf (" проезд")!=-1) {
+																							street = street.replace(" проезд", "");
+																							street="пр. "+ street;
+																						}
+																						else {
+																							if (street.indexOf (" линия")!=-1) {
+																								street = street.replace(" линия", "");
+																								street="линия "+ street;
+																							}
+																							
+																						}
+																					}
+																				}
+																			}
+																		}
+																	}	
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}	
+									//street1 != street ? moveList += (street ? (' — '+ street) : ''): '';
+									if (street==''){street='проезд дворовой'}
+									if 	(street1 != street)	{
+										moveList +=  (' — '+ street);
+										index_++;
+										Strit_m[index_]=[];
+										Strit_m[index_][0]=street;
+										Strit_m[index_][1]=Lstreet_;
+									}else{
+										Strit_m[index_][1]+=Lstreet_;
+									}
+									street1 = street;
+								}
+							}
+
+							moveList = moveList.replace(/ — /g, " — ");
+							moveList = moveList.replace(" — ", "");
+							index_++;
+							Strit_m[index_]=[];
+							Strit_m[index_][0]=moveList;
+							Strit_m[index_][1]=router.getLength()/1000;
+							
+							moveList += ("\n\n"+"ПРОТЯЖЕННОСТЬ = "  + router.getLength()/1000+ " км" );
+							
+							
+							// Выводим маршрутный лист.
+							document.getElementById('list').value =moveList;
+							
+						};
+					//ЗАПИСАТЬ МАРШРУТ
+						document.getElementById('buttons3').onclick = function () {
+							 // Создание события полечения геокординат обьекта
+							var geo_Objects = new CustomEvent('geo_Objects', {
+								bubbles: true,
+								detail: Strit_m
+							});
+							// вызываем событие
+							document.dispatchEvent(geo_Objects);
+							var moveList = ''
+							document.getElementById('list').value =moveList;// ОЧИЩАЕМ маршрутный лист.
+							//calculator = new DeliveryCalculator(myMap);
+							//self._map.geoObjects.remove(router);
+							//self._map.geoObjects.remove(this._start);
+							//self._map.geoObjects.remove(this._finish);
+							
+							
+						};
+					// ЦЕНТРИРУЕМ МАРШРУТ	
+						document.getElementById('foo').onclick = function () {
+							self._map.setBounds(router.geoObjects.getBounds());
+							
+							//
+						};
+                    });
+            });
+		this._map.geoObjects.remove(this._start);
+		this._map.geoObjects.remove(this._finish);
+		this._start = null;
+		this._finish = null;
+   }
+};
+
+
+document.addEventListener('geo_Objects', function (e) { // Слушаем событие
+        jso_geo_Objects.geo_Objects(e.detail);//вызываем метод myMethod из кода C#
+    }, false);
+
+
+
+
+ptp.setStartPoint = function (position) {
+    if(this._start) {
+        this._start.geometry.setCoordinates(position);
+    }
+    else {
+        this._start = new ymaps.Placemark(position, { iconContent: 'А' }, { draggable: true });
+        this._start.events.add('dragend', this._onDragEnd, this);
+        this._map.geoObjects.add(this._start);
+    }
+    this.getDirection();
+};
+
+ptp.setFinishPoint = function (position) {
+    if(this._finish) {
+        this._finish.geometry.setCoordinates(position);
+    }
+    else {
+        this._finish = new ymaps.Placemark(position, { iconContent: 'Б' }, { draggable: true });
+        this._finish.events.add('dragend', this._onDragEnd, this);
+        this._map.geoObjects.add(this._finish);
+    }
+    this.getDirection();
+};
+
+   
+	
+	</script>
+	<style>
+        html, body, #map { width: 100%; height: 100%; padding: 0; margin: 0;  }
+	
+    }
+    </style>
+    <style type="text/css">
+    TABLE {
+    table-layout: fixed; /* Ячейки фиксированной ширины */
+   }
+ 
+  </style>
+  
+ <style >
+a.button_1  {
+  display: inline-block;
+  color: black;
+  font-size: 125%;
+  font-weight: 700;
+  text-decoration: none;
+  user-select: none;
+  padding: .15em .5em;
+  outline: none;
+  border: 1px solid rgb(250,172,17);
+  border-radius: 7px;
+  background: rgb(255,212,3) linear-gradient(rgb(255,212,3), rgb(248,157,23));
+  box-shadow: inset 0 -2px 1px rgba(0,0,0,0), inset 0 1px 2px rgba(0,0,0,0), inset 0 0 0 60px rgba(255,255,0,0);
+  transition: box-shadow .2s, border-color .2s;
+} 
+a.button_1:hover {
+  box-shadow: inset 0 -1px 1px rgba(0,0,0,0), inset 0 1px 2px rgba(0,0,0,0), inset 0 0 0 60px rgba(255,255,0,.5);
+}
+a.button_1:active {
+  padding: calc(.25em + 1px) .5em calc(.25em - 1px);
+  border-color: rgba(177,159,0,1);
+  box-shadow: inset 0 -1px 1px rgba(0,0,0,.1), inset 0 1px 2px rgba(0,0,0,.3), inset 0 0 0 60px rgba(255,255,0,.45);
+}</style>
+  
+</head>
+
+<body>
+
+<table width="100%" height="100%" border="2" cellspacing="0" cellpadding="10" >
+<tr  >
+<td ><div id="map" style="width: 100%; height: 100%"></div> </td>
+<td width="290" height="80%" ><textarea wrap="soft" type="text" rows="30" cols="30"  id="list" readonly/> </textarea>  
+</br>
+</br>
+<div  align = "center">
+        <input type="button" style="width:200px;" value="ОЧИСТИТЬ МАРШРУТ" id="buttons2" /></br></br>
+        <input type="button" style="width:200px;" value="ЗАПИСАТЬ МАРШРУТ" id="buttons3" /></br></br>
+	<input class="btn"  data-clipboard-action="copy" data-clipboard-target="#list"  type="button" style="width:250px;" value="СПИСОК УЛИЦ и ПРОТЯЖЕННОСТЬ" id="buttons1"  /></br></br>
+        <input  type="button"  style="width:200px;" value="МАРШРУТ по ЦЕНТРУ" id="foo"   />
+		<p></p>
+    <a href="index.html"  type="button"  class="button_1">Вернутса в шар</a>
+	<!-- 2. Include library -->
+    
+    <script src="clipboard.min.js"></script>
+
+    <!-- 3. Instantiate clipboard -->
+    <script>
+    var clipboard = new ClipboardJS('.btn');
+
+    clipboard.on('success', function(e) {
+        console.log(e);
+    });
+
+    clipboard.on('error', function(e) {
+        console.log(e);
+    });
+   </script>
+   </div>
+	
+</td>
+</tr>
+</table> 
+
+    
+ 
+</body>
+
+</html>
+
